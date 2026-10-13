@@ -18,11 +18,14 @@ def main() -> None:
                    default=Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "agent-checkout-runner")
     r.add_argument("--case", action="append", help="run only this case (repeatable)")
     r.add_argument("--reader", help="external reader command; {bundle} is replaced with the bundle path")
+    r.add_argument("--suite", action="append", help="run only this component suite (repeatable)")
+    r.add_argument("--no-suites", action="store_true", help="run the matrix only, not the component suites")
     v = sub.add_parser("verify", help="re-check a sealed bundle and re-derive every claim from its streams")
     v.add_argument("bundle", type=Path)
     a = ap.parse_args()
     if a.cmd == "run":
-        raise SystemExit(run(a.out.resolve(), a.cache.resolve(), set(a.case) if a.case else None, a.reader))
+        raise SystemExit(run(a.out.resolve(), a.cache.resolve(), set(a.case) if a.case else None, a.reader,
+                             set(a.suite) if a.suite else None, not a.no_suites))
     raise SystemExit(main_verify(a.bundle.resolve()))
 
 

@@ -62,9 +62,21 @@ MUTANTS = [
      'if _integrity_codes(d["record"], trust)]'),
     ("report: count duplicate effects as one", "report.py",
      "dup = {r: n for r, n in per_res.items() if n > 1}", "dup = {}"),
+    ("suites: a failed setup counts as a contradiction", "suites.py",
+     'if first["kind"] == "setup":', "if False:"),
+    ("suites: a record missing steps still passes", "suites.py",
+     'if len(steps) != record["planned_steps"] + 1:', "if False:"),
+    ("suites: run whatever the clone's HEAD is", "suites.py",
+     'subprocess.run(["git", "checkout", "-q", "--force", commit]', 'subprocess.run(["git", "checkout", "-q", "--force", "HEAD"]'),
+    ("suites: a program that cannot start counts as passing", "suites.py",
+     "code, stdout, stderr = 127,", "code, stdout, stderr = 0,"),
+    ("suites: a suite with no cases step passes", "suites.py",
+     "        if cases == 0:\n", "        if False:\n"),
+    ("runner: verify skips the suite verdicts", "runner.py",
+     'if suites_mod.verdict(record)["verdict"] != s["verdict"]:', "if False:"),
 ]
 
-TESTS = ["tests/test_handoff.py", "tests/test_report.py", "tests/test_matrix.py"]
+TESTS = ["tests/test_handoff.py", "tests/test_report.py", "tests/test_suites.py", "tests/test_matrix.py"]
 
 
 def run_suite(src_parent: Path) -> tuple[int, str]:

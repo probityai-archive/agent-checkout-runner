@@ -7,5 +7,183 @@
       "commit": "dedc818fbde6bf78c101cf8873a6b65522beb398",
       "fetch": "main"
     }
+  },
+  "suites": {
+    "pic-refund-approval": {
+      "what": "PIC signed refund approval: 22 verification and dispatch cases, two integrity probes, environment pin check",
+      "repo": "https://github.com/pic-standard/pic-standard",
+      "commit": "eb7cd4672addc02e1ea80a7a83fadf97d9b0a93e",
+      "fetch": "main",
+      "steps": [
+        {
+          "kind": "setup",
+          "cwd": "examples/refund-approval",
+          "argv": [
+            "{python}",
+            "-m",
+            "venv",
+            "--clear",
+            "{scratch}/venv"
+          ]
+        },
+        {
+          "kind": "setup",
+          "cwd": "examples/refund-approval",
+          "argv": [
+            "{scratch}/venv/bin/python",
+            "-m",
+            "pip",
+            "install",
+            "-q",
+            "--disable-pip-version-check",
+            "-r",
+            "requirements.txt",
+            "-c",
+            "constraints.txt"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "examples/refund-approval",
+          "argv": [
+            "{scratch}/venv/bin/python",
+            "test_cases.py"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "examples/refund-approval",
+          "argv": [
+            "{scratch}/venv/bin/python",
+            "self_check.py"
+          ]
+        }
+      ],
+      "retain": [
+        "examples/refund-approval/actual-results.json"
+      ]
+    },
+    "aps-refund-exact-approval": {
+      "what": "APS exact-refund admission candidate: cases R0 to R9 against agent-passport-system 7.2.1",
+      "repo": "https://github.com/agent-passport-system/agent-passport-system",
+      "commit": "c31d94aad86713ae9b2e4cbc811deeab4b5d91ed",
+      "fetch": "main",
+      "steps": [
+        {
+          "kind": "setup",
+          "cwd": "examples/interop/refund-exact-approval",
+          "argv": [
+            "npm",
+            "install",
+            "--no-audit",
+            "--no-fund",
+            "--ignore-scripts"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "examples/interop/refund-exact-approval",
+          "argv": [
+            "npm",
+            "test"
+          ]
+        }
+      ],
+      "retain": [
+        "examples/interop/refund-exact-approval/package-lock.json"
+      ]
+    },
+    "refund-predicates-c1-c3": {
+      "what": "C1 dispatch binding, C2 committed effects, C3 report-time observations: readers and separately authored reproducers, plus the offline baseline and mutation verifiers",
+      "repo": "https://github.com/Rul1an/assay",
+      "commit": "c039b7cd7bfea25a37c4a3e9a0dbaea85e1e52b3",
+      "fetch": "main",
+      "steps": [
+        {
+          "kind": "cases",
+          "cwd": "docs/experiments/refund-predicates-2026-10/record/c1",
+          "argv": [
+            "{python}",
+            "-B",
+            "-m",
+            "unittest",
+            "-v",
+            "test_reader",
+            "test_independent_reproducer"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "docs/experiments/refund-predicates-2026-10/record/c2",
+          "argv": [
+            "{python}",
+            "-B",
+            "-m",
+            "unittest",
+            "-v",
+            "test_reader",
+            "test_independent_reproducer"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "docs/experiments/refund-predicates-2026-10/record/c3",
+          "argv": [
+            "{python}",
+            "-B",
+            "-m",
+            "unittest",
+            "-v",
+            "test_reader",
+            "test_independent_reproducer"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "docs/experiments/refund-predicates-2026-10",
+          "argv": [
+            "{python}",
+            "-B",
+            "verify_baseline.py"
+          ]
+        },
+        {
+          "kind": "cases",
+          "cwd": "docs/experiments/refund-predicates-2026-10",
+          "argv": [
+            "{python}",
+            "-B",
+            "verify_mutation.py"
+          ]
+        }
+      ]
+    },
+    "refund-handoff-0.1": {
+      "what": "refund-handoff/0.1 conformance: 80 hostile vectors for the signed admission record, authenticated handoff, attempts, effects and cutoff",
+      "repo": "https://github.com/probityai/agent-evidence-observer",
+      "commit": "38e75b16a967fb01048ef93ed4e12290c8f3a540",
+      "fetch": "main",
+      "steps": [
+        {
+          "kind": "cases",
+          "cwd": ".",
+          "argv": [
+            "bash",
+            "interop/refund-handoff-conformance-2026-10-12/verify_install.sh",
+            "{scratch}/conformance"
+          ],
+          "timeout": 3600
+        }
+      ],
+      "retain_tree": {
+        "from": "{scratch}/conformance",
+        "to": "conformance",
+        "exclude": [
+          ".venv",
+          "test-source",
+          "evidence-source"
+        ]
+      }
+    }
   }
 }

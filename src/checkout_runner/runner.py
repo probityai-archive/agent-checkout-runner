@@ -18,6 +18,7 @@ from typing import Any
 from agent_evidence_vectors.run_vectors import ed25519_public_key, ed25519_sign, ed25519_verify, jcs_dumps, pae
 
 from . import cases as cases_mod
+from . import suites as suites_mod
 from .gate_client import GateProcess
 from .report import CLAIMS, RUN_LIMITS, derive
 from .world import T0, World
@@ -32,6 +33,10 @@ REPORT_SEED = hashlib.sha256(b"agent-checkout-runner/test-key/report/v1").digest
 
 def components() -> dict[str, Any]:
     return json.loads(LOCK.read_text(encoding="utf-8"))["components"]
+
+
+def suites() -> dict[str, Any]:
+    return json.loads(LOCK.read_text(encoding="utf-8"))["suites"]
 
 
 def _git(cwd: Path, *args: str) -> str:
@@ -106,6 +111,7 @@ def provenance(gates: dict[str, Path]) -> dict[str, Any]:
         "agent_evidence_vectors": metadata.version("agent-evidence-vectors"),
         "python": platform.python_version(), "node": node, "platform": platform.platform(),
         "components": {k: {"repo": v["repo"], "commit": v["commit"], "role": v["role"]} for k, v in comps.items()},
+        "suites": {k: {"repo": v["repo"], "commit": v["commit"], "what": v["what"]} for k, v in suites().items()},
         "operated_by": os.environ.get("RUNNER_OPERATOR", "the runner's author"),
         "classification": "runner-operated fixture run; not an independent run and not a host adoption",
     }
@@ -146,6 +152,10 @@ def verify_bundle(out: Path) -> list[str]:
         again = derive(out / "cases" / c["pin"] / c["case"])
         if jcs_dumps(again) != jcs_dumps(c["claims"]):
             problems.append(f"{c['pin']}/{c['case']}: claims do not re-derive from the retained streams")
+    for s in report["component_suites"]:
+        record = json.loads((out / "components" / s["suite"] / "steps.json").read_text(encoding="utf-8"))
+        if suites_mod.verdict(record)["verdict"] != s["verdict"]:
+            problems.append(f"suite {s['suite']}: verdict does not re-derive from its retained steps")
     return problems
 
 
@@ -162,16 +172,20 @@ def run_reader(out: Path, command: str) -> dict[str, Any]:
     return result
 
 
-def run(out: Path, cache: Path, only: set[str] | None = None, reader: str | None = None) -> int:
+def run(out: Path, cache: Path, only: set[str] | None = None, reader: str | None = None,
+        only_suites: set[str] | None = None, with_suites: bool = True) -> int:
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     gates = fetch(cache)
     matrix = run_matrix(out, gates, only)
     passed = all(c["matches_expected"] for c in matrix["cases"])
+    suite_results = suites_mod.run_all(suites(), cache, out, only_suites) if with_suites else []
+    suites_ok = all(s["verdict"] == suites_mod.E for s in suite_results)
     report = {"format": "agent-checkout-runner/report-v1", "provenance": provenance(gates), "matrix": matrix,
+              "component_suites": suite_results,
               "run_limits": {k: {"verdict": "NOT_ESTABLISHED", "why": v} for k, v in RUN_LIMITS.items()},
-              "all_cases_match_expected": passed}
+              "all_cases_match_expected": passed, "all_suites_established": suites_ok}
     seal(out, report)
     for c in matrix["cases"]:
         mark = "ok  " if c["matches_expected"] else "FAIL"
@@ -181,10 +195,12 @@ def run(out: Path, cache: Path, only: set[str] | None = None, reader: str | None
             print(f"       {claim}: derived {m['derived']}, expected {m['expected']}: {c['claims'][claim]['why']}")
     n = len(matrix["cases"])
     print(f"{sum(c['matches_expected'] for c in matrix['cases'])}/{n} cases match their declared claims")
+    for s in suite_results:
+        print(f"{s['verdict']:16} suite {s['suite']}: {s['why']}")
     if reader:
         r = run_reader(out, reader)
         print(f"reader exit {r['exit']} (kept in reader/, not part of the runner's verdicts)")
-    return 0 if passed else 1
+    return 0 if passed and suites_ok else 1
 
 
 def main_verify(out: Path) -> int:

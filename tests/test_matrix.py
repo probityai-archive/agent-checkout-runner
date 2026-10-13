@@ -20,7 +20,7 @@ CACHE = Path(os.environ.get("RUNNER_CACHE", Path.home() / ".cache" / "agent-chec
 @pytest.fixture(scope="session")
 def bundle(tmp_path_factory):
     out = tmp_path_factory.mktemp("run") / "bundle"
-    rc = run(out, CACHE)
+    rc = run(out, CACHE, with_suites=False)
     return out, rc
 
 
