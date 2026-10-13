@@ -28,7 +28,7 @@ class Case:
     summary: str
     run: Callable[[World], None]
     expect: dict[str, str]
-    pins: tuple[str, ...] = ("main", "pr1")
+    pins: tuple[str, ...] = ("main",)
     cutoff_ms: int = T0 + 10 * MINUTE
     refusal: str | None = None
     decisions: list[list[str]] = field(default_factory=list)
@@ -224,7 +224,7 @@ def gate_crash_recovery(w: World) -> None:
     w.reconcile(r["reservation_id"], "failed", "executor-refused-before-dispatch", T0 + 16 * MINUTE + 2000)
 
 
-# -- optional required evidence (aps-checkout-gate pull request 1) ------------------------
+# -- optional required evidence (the gate's evidence hook and verdict adapter) ---------------
 
 REVIEWER = "agent-checkout-runner/reviewer"
 
@@ -256,7 +256,7 @@ def verdict_other_request(w: World) -> None:
 
 
 def published_verdict(w: World) -> None:
-    """The real invinoveritas verdict from the gate's pull request, through the whole gate."""
+    """The real invinoveritas verdict published in the gate's test vectors, through the whole gate."""
     fixture = json.loads((w.gate_dir / "test" / "vectors" / PUBLISHED_VERDICT).read_text(encoding="utf-8"))
     ev, req = fixture["event"], fixture["request"]
     at = json.loads(ev["content"])["verified_at"] * 1000 + 1000
@@ -348,18 +348,18 @@ def matrix() -> list[Case]:
              "to unresolved", gate_crash_recovery, REFUSED, refusal="permit_expired", decisions=PERMIT,
              attempts=ref, cutoff_ms=T0 + 20 * MINUTE),
         Case("verdict_present", "the gate requires a reviewer verdict and gets one on this exact request",
-             verdict_present, HAPPY, pins=("pr1",), decisions=PERMIT, attempts=ok,
+             verdict_present, HAPPY, decisions=PERMIT, attempts=ok,
              evidence_checks=_reviewer_checks),
         Case("verdict_missing", "the gate requires a reviewer verdict and gets none", verdict_missing,
-             {**REFUSED, **no_res}, pins=("pr1",), refusal="not_a_permit",
+             {**REFUSED, **no_res}, refusal="not_a_permit",
              decisions=[["deny", "evidence_missing"]], attempts=ref, evidence_checks=_reviewer_checks),
         Case("verdict_other_request", "the verdict binds a different request", verdict_other_request,
-             {**REFUSED, **no_res}, pins=("pr1",), refusal="not_a_permit",
+             {**REFUSED, **no_res}, refusal="not_a_permit",
              decisions=[["deny", "verdict_request_mismatch"]], attempts=ref, evidence_checks=_reviewer_checks),
-        Case("published_verdict", "the real invinoveritas verdict published with the gate's pull request, through "
+        Case("published_verdict", "the real invinoveritas verdict in the gate's own test vectors, through "
              "decide()", published_verdict,
              {**REFUSED, **no_res, "evidence.offline_verdict_check": E, "evidence.verdict_permits_through_gate": C},
-             pins=("pr1",), refusal="not_a_permit", decisions=[["deny", "malformed_request"]], attempts=ref,
+             refusal="not_a_permit", decisions=[["deny", "malformed_request"]], attempts=ref,
              evidence_checks=_published_checks, parties=_published_parties()),
     ]
 

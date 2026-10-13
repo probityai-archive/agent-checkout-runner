@@ -39,8 +39,8 @@ CLAIMS = (
 RUN_LIMITS = {
     "provider.live_behaviour": "the provider is a local simulator; nothing here exercised a real payment or refund API",
     "gate.multi_host": "one gate process and one sqlite file; two hosts were not run",
-    "admission.signed_handoff_format": "the handoff is the gate's own signed decision; no separate signed admission record "
-                                        "with its own verifier exists yet",
+    "admission.signed_handoff_format": "the handoff is the gate's own signed decision receipt and its committed evidence; "
+                                        "no component driven here emits a separate signed admission record yet",
     "run.independent": "this run was operated by the runner's author on fixtures it generated; it is not an independent "
                        "run and not a host or merchant adoption",
     "settlement_and_fulfilment": "a permit and a simulator effect say nothing about settlement or delivery",
