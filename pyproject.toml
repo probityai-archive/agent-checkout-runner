@@ -1,0 +1,24 @@
+[project]
+name = "agent-checkout-runner"
+version = "0.1.0"
+description = "Combined runner for agent checkout and refund components: drives each component, keeps decisions, dispatch attempts, effects and observations apart, and reports each claim as ESTABLISHED, CONTRADICTED or NOT_ESTABLISHED"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+readme = "README.md"
+dependencies = ["agent-evidence-vectors==0.18.1"]
+
+[project.scripts]
+agent-checkout-runner = "checkout_runner.cli:main"
+
+[dependency-groups]
+dev = ["pytest==8.4.2"]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/checkout_runner"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

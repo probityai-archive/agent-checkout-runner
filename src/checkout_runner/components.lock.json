@@ -1,0 +1,17 @@
+{
+  "format": "agent-checkout-runner/components-v1",
+  "components": {
+    "aps-checkout-gate@main": {
+      "role": "admission gate: grant and intent check, budget reservation, signed permit or refusal",
+      "repo": "https://github.com/agent-passport-system/aps-checkout-gate",
+      "commit": "824bdf79d9d95c891d0f531bceef4938e827d97d",
+      "fetch": "main"
+    },
+    "aps-checkout-gate@pr1": {
+      "role": "the same gate plus the optional evidence hook and the invinoveritas verdict adapter",
+      "repo": "https://github.com/agent-passport-system/aps-checkout-gate",
+      "commit": "12f502392dde4c880abc88949dca0062b2aa10b5",
+      "fetch": "pull/1/head"
+    }
+  }
+}
