@@ -1,0 +1,54 @@
+name: agent-checkout-runner
+description: >-
+  Run the checkout and refund case matrix against the pinned components, or against your own
+  aps-checkout-gate checkout, seal the bundle, re-check it, and upload it as an artifact.
+inputs:
+  gate-dir:
+    description: >-
+      Path to an aps-checkout-gate checkout with its dependencies installed (npm ci). Empty runs the
+      gate commit pinned in this runner's lock file.
+    required: false
+    default: ''
+  suites:
+    description: Also run each refund component's own published cases at its pin ('true' or 'false').
+    required: false
+    default: 'true'
+  artifact-name:
+    description: Name of the uploaded bundle artifact.
+    required: false
+    default: agent-checkout-runner-bundle
+outputs:
+  bundle:
+    description: Path of the sealed bundle.
+    value: ${{ steps.run.outputs.bundle }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      with:
+        node-version: '24'
+    - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+      with:
+        version: '0.12.23'
+    - id: run
+      shell: bash
+      env:
+        GATE_DIR: ${{ inputs.gate-dir }}
+        SUITES: ${{ inputs.suites }}
+        RUNNER_OPERATOR: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        bundle="$RUNNER_TEMP/agent-checkout-runner-bundle"
+        args=(run --out "$bundle")
+        if [ -n "$GATE_DIR" ]; then args+=(--gate-dir "$GATE_DIR"); fi
+        if [ "$SUITES" != "true" ]; then args+=(--no-suites); fi
+        uv run --project "$GITHUB_ACTION_PATH" --locked agent-checkout-runner "${args[@]}" | tee "$RUNNER_TEMP/acr-run.txt"
+        uv run --project "$GITHUB_ACTION_PATH" --locked agent-checkout-runner verify "$bundle"
+        cp "$RUNNER_TEMP/acr-run.txt" "$bundle/run.txt"
+        echo "bundle=$bundle" >> "$GITHUB_OUTPUT"
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      if: always()
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/agent-checkout-runner-bundle
+        if-no-files-found: error
