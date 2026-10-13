@@ -65,3 +65,18 @@ def test_streams_stay_separate(bundle):
     assert {"decisions.jsonl", "attempts.jsonl", "effects.jsonl", "observations.jsonl"} <= names
     decisions = [json.loads(line) for line in (d / "decisions.jsonl").read_text().splitlines()]
     assert {r["kind"] for r in decisions} <= {"decision", "outcome", "reconcile", "reservation_final"}
+
+
+def test_a_host_checkout_runs_in_place_of_the_pin(bundle, tmp_path):
+    from checkout_runner.runner import components
+
+    commit = components()["aps-checkout-gate@main"]["commit"]
+    out = tmp_path / "host"
+    rc = run(out, CACHE, only={"match_dispatch", "changed_amount"}, with_suites=False, gate_dir=CACHE / commit)
+    report = json.loads((out / "report.json").read_text())
+    assert rc == 0
+    assert report["provenance"]["components"] == {
+        "aps-checkout-gate@main": {"source": "host checkout", "commit": commit, "dirty": False}}
+    assert report["provenance"]["classification"].startswith("run against a host-supplied gate checkout")
+    assert [c["case"] for c in report["matrix"]["cases"]] == ["match_dispatch", "changed_amount"]
+    assert verify_bundle(out) == []

@@ -103,17 +103,26 @@ def run_matrix(out: Path, gates: dict[str, Path], only: set[str] | None = None) 
     return {"cases": results}
 
 
-def provenance(gates: dict[str, Path]) -> dict[str, Any]:
+def host_gate(gate_dir: Path) -> dict[str, Any]:
+    """What a host-supplied gate checkout is, read from the checkout itself."""
+    return {"source": "host checkout", "commit": _git(gate_dir, "rev-parse", "HEAD"),
+            "dirty": bool(_git(gate_dir, "status", "--porcelain", "--untracked-files=no"))}
+
+
+def provenance(gates: dict[str, Path], gate_dir: Path | None = None) -> dict[str, Any]:
     node = subprocess.run(["node", "--version"], capture_output=True, text=True, check=True).stdout.strip()
     comps = components()
+    pinned = {k: {"repo": v["repo"], "commit": v["commit"], "role": v["role"]} for k, v in comps.items()}
     return {
         "runner": {"name": "agent-checkout-runner", "version": metadata.version("agent-checkout-runner")},
         "agent_evidence_vectors": metadata.version("agent-evidence-vectors"),
         "python": platform.python_version(), "node": node, "platform": platform.platform(),
-        "components": {k: {"repo": v["repo"], "commit": v["commit"], "role": v["role"]} for k, v in comps.items()},
+        "components": {"aps-checkout-gate@main": host_gate(gate_dir)} if gate_dir else pinned,
         "suites": {k: {"repo": v["repo"], "commit": v["commit"], "what": v["what"]} for k, v in suites().items()},
         "operated_by": os.environ.get("RUNNER_OPERATOR", "the runner's author"),
-        "classification": "runner-operated fixture run; not an independent run and not a host adoption",
+        "classification": ("run against a host-supplied gate checkout on synthetic fixtures; operated_by names who ran it"
+                           if gate_dir else
+                           "runner-operated fixture run; not an independent run and not a host adoption"),
     }
 
 
@@ -173,16 +182,16 @@ def run_reader(out: Path, command: str) -> dict[str, Any]:
 
 
 def run(out: Path, cache: Path, only: set[str] | None = None, reader: str | None = None,
-        only_suites: set[str] | None = None, with_suites: bool = True) -> int:
+        only_suites: set[str] | None = None, with_suites: bool = True, gate_dir: Path | None = None) -> int:
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    gates = fetch(cache)
+    gates = {"main": gate_dir} if gate_dir else fetch(cache)
     matrix = run_matrix(out, gates, only)
     passed = all(c["matches_expected"] for c in matrix["cases"])
     suite_results = suites_mod.run_all(suites(), cache, out, only_suites) if with_suites else []
     suites_ok = all(s["verdict"] == suites_mod.E for s in suite_results)
-    report = {"format": "agent-checkout-runner/report-v1", "provenance": provenance(gates), "matrix": matrix,
+    report = {"format": "agent-checkout-runner/report-v1", "provenance": provenance(gates, gate_dir), "matrix": matrix,
               "component_suites": suite_results,
               "run_limits": {k: {"verdict": "NOT_ESTABLISHED", "why": v} for k, v in RUN_LIMITS.items()},
               "all_cases_match_expected": passed, "all_suites_established": suites_ok}

@@ -72,6 +72,9 @@ MUTANTS = [
      "code, stdout, stderr = 127,", "code, stdout, stderr = 0,"),
     ("suites: a suite with no cases step passes", "suites.py",
      "        if cases == 0:\n", "        if False:\n"),
+    ("runner: a host checkout is reported as the pin", "runner.py",
+     '"components": {"aps-checkout-gate@main": host_gate(gate_dir)} if gate_dir else pinned,',
+     '"components": pinned,'),
     ("runner: verify skips the suite verdicts", "runner.py",
      'if suites_mod.verdict(record)["verdict"] != s["verdict"]:', "if False:"),
 ]
