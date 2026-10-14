@@ -47,10 +47,6 @@ A connected result will not be reported until each of these is public and pinned
 
 The runner then drives those producers in one run, verifies each signed admission handoff and committed record itself, retains the streams separately, and hands the bundle to the reader.
 
-## Effort
-
-On the runner side, wiring a frozen contract is capped at two person-days after the freeze: the producer adapters, the refund cases, and CI. A contract that grows past that is rescoped, not absorbed. Admission signing, execution, the merchant side and the reader stay with their owners.
-
 ## What this is not
 
 Every record is synthetic and the provider is a local simulator. A run by this repository's author is a fixture run, not an independent run or a host adoption. The refund-handoff/0.1 profile is a proposal, not the group's accepted contract. Passing the component suites side by side is not a connected result.
