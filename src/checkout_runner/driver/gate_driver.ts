@@ -132,6 +132,10 @@ const ops: Record<string, (a: any) => any> = {
   verify(a) {
     return decisionMod.verifyDecision(a.record, a.gate_id, a.public_key)
   },
+  /** The gate's own runtime request check, the one decide() applies first. */
+  request_problems(a) {
+    return requestMod.requestShapeProblems(a.request)
+  },
   verdict_problems(a) {
     if (!verdictMod) throw new Error('this gate checkout has no src/verdict.ts')
     return verdictMod.verdictProblems(a.event, a.request, a.action_ref, new Date(a.now), a.cfg)

@@ -31,6 +31,7 @@ CLAIMS = (
     "budget.held_until_confirmed",
     "outcome.resolved_at_cutoff",
     "evidence.offline_verdict_check",
+    "evidence.verdict_request_admissible",
     "evidence.verdict_permits_through_gate",
 )
 
@@ -161,11 +162,19 @@ def derive(case_dir: Path) -> dict[str, dict[str, str]]:
     if "verdict_problems" in checks:
         put("evidence.offline_verdict_check", E if checks["verdict_problems"] == [] else C,
             f"verdictProblems returned {checks['verdict_problems']}")
+        if "request_problems" in checks:
+            probs, ctl = checks["request_problems"], checks.get("request_problems_segment_control")
+            put("evidence.verdict_request_admissible", E if probs == [] else C,
+                f"requestShapeProblems on the signed request returned {probs}; "
+                f"with the merchant id as one scope segment it returned {ctl}")
+        else:
+            put("evidence.verdict_request_admissible", N, "the request check was not run")
         through = any(d["verdict"] == "permit" for d in decisions)
         put("evidence.verdict_permits_through_gate", E if through else C,
             f"gate decisions {got}")
     else:
         put("evidence.offline_verdict_check", N, "no published verdict in this case")
+        put("evidence.verdict_request_admissible", N, "no published verdict in this case")
         put("evidence.verdict_permits_through_gate", N, "no published verdict in this case")
     return out
 

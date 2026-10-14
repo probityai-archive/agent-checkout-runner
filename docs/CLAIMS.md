@@ -15,6 +15,7 @@ Every claim is derived by `checkout_runner.report.derive` from one case director
 | `budget.held_until_confirmed` | gate events, effects | No reservation was released without a confirmation, and none with an effect |
 | `outcome.resolved_at_cutoff` | gate events, observations | At the report cutoff each reservation's state agrees with what was observed by then; an observation after the cutoff does not count |
 | `evidence.offline_verdict_check` | component checks | The gate's offline verdict check accepts the published verdict |
+| `evidence.verdict_request_admissible` | component checks | The request the published verdict signs passes the gate's own `requestShapeProblems`; the report also records the result with the merchant id made one scope segment |
 | `evidence.verdict_permits_through_gate` | decisions | That verdict also yields a permit through `decide()` |
 
 ## The independent handoff check

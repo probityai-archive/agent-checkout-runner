@@ -158,3 +158,25 @@ def test_report_reads_only_files(tmp_path):
     d = case_dir(tmp_path, {"decisions": [decision(P)]})
     first = derive(d)
     assert json.dumps(first, sort_keys=True) == json.dumps(derive(d), sort_keys=True)
+
+
+def test_an_inadmissible_verdict_request_contradicts(tmp_path):
+    probs = ["merchant_id is not a valid scope segment"]
+    c = claims(tmp_path, component_checks=[
+        {"check": "verdict_problems", "at_ms": T, "result": []},
+        {"check": "request_problems", "at_ms": T, "result": probs},
+        {"check": "request_problems_segment_control", "at_ms": T, "result": []}])
+    assert c["evidence.verdict_request_admissible"] == C
+    assert c["evidence.offline_verdict_check"] == E
+
+
+def test_an_admissible_verdict_request_is_established(tmp_path):
+    c = claims(tmp_path, component_checks=[
+        {"check": "verdict_problems", "at_ms": T, "result": []},
+        {"check": "request_problems", "at_ms": T, "result": []}])
+    assert c["evidence.verdict_request_admissible"] == E
+
+
+def test_a_verdict_without_the_request_check_is_not_established(tmp_path):
+    c = claims(tmp_path, component_checks=[{"check": "verdict_problems", "at_ms": T, "result": []}])
+    assert c["evidence.verdict_request_admissible"] == N

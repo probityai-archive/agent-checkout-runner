@@ -24,7 +24,7 @@ The first command fetches every pinned component, runs the matrix and the compon
 ```text
 ok   main lost_response_retry          decisions_verify=E ... at_most_once=E held_until_confirmed=E resolved_at_cutoff=E
 ok   main lost_response_after_cutoff   decisions_verify=E ... resolved_at_cutoff=N
-ok   main published_verdict            ... offline_verdict_check=E verdict_permits_through_gate=C
+ok   main published_verdict            ... offline_verdict_check=E verdict_request_admissible=C verdict_permits_through_gate=C
 26/26 cases match their declared claims
 ESTABLISHED      suite pic-refund-approval: 2 cases steps exited 0 at eb7cd4672add
 ESTABLISHED      suite aps-refund-exact-approval: 1 cases steps exited 0 at c31d94aad867

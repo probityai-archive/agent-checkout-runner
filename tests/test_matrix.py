@@ -80,3 +80,17 @@ def test_a_host_checkout_runs_in_place_of_the_pin(bundle, tmp_path):
     assert report["provenance"]["classification"].startswith("run against a host-supplied gate checkout")
     assert [c["case"] for c in report["matrix"]["cases"]] == ["match_dispatch", "changed_amount"]
     assert verify_bundle(out) == []
+
+
+def test_the_published_verdict_is_refused_for_its_merchant_id_alone(bundle):
+    """The gate's own vector signs merchant_id 'merchant:example-store', which its SEGMENT rule refuses.
+
+    The control replaces only the colon. If the gate relaxes the rule or the vector is re-signed over a
+    valid request, this test fails and the case's declared claims must change with it.
+    """
+    out, _ = bundle
+    d = out / "cases" / "main" / "published_verdict"
+    checks = {r["check"]: r["result"] for r in map(json.loads, (d / "component_checks.jsonl").read_text().splitlines())}
+    assert checks["verdict_problems"] == []
+    assert checks["request_problems"] == ["merchant_id is not a valid scope segment"]
+    assert checks["request_problems_segment_control"] == []

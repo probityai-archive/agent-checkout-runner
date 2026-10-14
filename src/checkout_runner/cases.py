@@ -262,6 +262,11 @@ def published_verdict(w: World) -> None:
     at = json.loads(ev["content"])["verified_at"] * 1000 + 1000
     cfg = {"verifierPubkey": ev["pubkey"], "proceedOn": ["approve", "approve_with_concerns"]}
     action_ref = w.gate.call("digest", request=req)
+    # Which of the gate's own request rules the signed request breaks, and the same request with the
+    # merchant id made a single scope segment as the control, so a refusal is attributed to its rule.
+    w.component_check("request_problems", w.gate.call("request_problems", request=req), at)
+    control = {**req, "merchant_id": req["merchant_id"].replace(":", "-")}
+    w.component_check("request_problems_segment_control", w.gate.call("request_problems", request=control), at)
     w.component_check("verdict_problems", w.gate.call("verdict_problems", event=ev, request=req,
                                                       action_ref=action_ref, now=at, cfg=cfg), at)
     grant = w.grant(at, agent=req["agent_id"], merchant=req["merchant_id"])
@@ -358,7 +363,8 @@ def matrix() -> list[Case]:
              decisions=[["deny", "verdict_request_mismatch"]], attempts=ref, evidence_checks=_reviewer_checks),
         Case("published_verdict", "the real invinoveritas verdict in the gate's own test vectors, through "
              "decide()", published_verdict,
-             {**REFUSED, **no_res, "evidence.offline_verdict_check": E, "evidence.verdict_permits_through_gate": C},
+             {**REFUSED, **no_res, "evidence.offline_verdict_check": E,
+              "evidence.verdict_request_admissible": C, "evidence.verdict_permits_through_gate": C},
              refusal="not_a_permit", decisions=[["deny", "malformed_request"]], attempts=ref,
              evidence_checks=_published_checks, parties=_published_parties()),
     ]
