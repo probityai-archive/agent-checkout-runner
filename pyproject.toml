@@ -1,6 +1,6 @@
 [project]
 name = "agent-checkout-runner"
-version = "0.1.0"
+version = "0.2.0"
 description = "Combined runner for agent checkout and refund components: drives each component, keeps decisions, dispatch attempts, effects and observations apart, and reports each claim as ESTABLISHED, CONTRADICTED or NOT_ESTABLISHED"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }

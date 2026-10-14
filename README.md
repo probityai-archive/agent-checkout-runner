@@ -7,7 +7,7 @@ It is for component owners and reviewers who want one reproducible run, with neg
 ## Install
 
 ```sh
-uv tool install git+https://github.com/probityai/agent-checkout-runner@v0.1.0
+uv tool install git+https://github.com/probityai/agent-checkout-runner@v0.2.0
 ```
 
 It pins `agent-evidence-vectors==0.18.1` for JCS and Ed25519. It needs git, Node 24 and npm.
@@ -19,7 +19,7 @@ agent-checkout-runner run --out bundle
 agent-checkout-runner verify bundle
 ```
 
-The first command fetches every pinned component, runs the matrix and the component suites, and seals the bundle. The second re-checks the sums and the signed report, then re-derives every claim from the retained streams. A run at v0.1.0 prints, in part:
+The first command fetches every pinned component, runs the matrix and the component suites, and seals the bundle. The second re-checks the sums and the signed report, then re-derives every claim from the retained streams. A run at v0.2.0 prints, in part:
 
 ```text
 ok   main lost_response_retry          decisions_verify=E ... at_most_once=E held_until_confirmed=E resolved_at_cutoff=E
@@ -38,7 +38,7 @@ Hand the sealed bundle to an independent reader with `--reader "<command> {bundl
 ## Run it in your own CI
 
 ```yaml
-- uses: probityai/agent-checkout-runner@v0.1.0
+- uses: probityai/agent-checkout-runner@v0.2.0
   with:
     gate-dir: path/to/your/aps-checkout-gate   # empty: the pinned commit
 ```
@@ -51,7 +51,7 @@ Every record is synthetic, the provider is a local simulator and the keys are pu
 
 ## Status
 
-v0.1.0. The matrix drives `aps-checkout-gate` at `dedc818`. CI runs the unit tests, a full sealed run through the Action, and a host-checkout run.
+v0.2.0. The matrix drives `aps-checkout-gate` at `dedc818`. CI runs the unit tests, a full sealed run through the Action, and a host-checkout run.
 
 ## Docs
 

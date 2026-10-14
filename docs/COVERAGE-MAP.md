@@ -1,6 +1,6 @@
 # Coverage map for the refund and checkout workflows
 
-This page maps the acceptance criteria and open decisions in [aeoess/agent-governance-vocabulary#193](https://github.com/aeoess/agent-governance-vocabulary/issues/193) to what this runner executes today, and states what a connected run still needs. Pins are the ones in [`components.lock.json`](../src/checkout_runner/components.lock.json) at v0.1.0.
+This page maps the acceptance criteria and open decisions in [aeoess/agent-governance-vocabulary#193](https://github.com/aeoess/agent-governance-vocabulary/issues/193) to what this runner executes today, and states what a connected run still needs. Pins are the ones in [`components.lock.json`](../src/checkout_runner/components.lock.json) at v0.2.0.
 
 ## Who owns what
 
