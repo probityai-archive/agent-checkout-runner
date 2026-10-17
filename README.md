@@ -1,3 +1,6 @@
+<!-- moved-to-monorepo -->
+> **Moved to [github.com/probityai/probity/examples/checkout-runner](https://github.com/probityai/probity/tree/main/examples/checkout-runner).** This repository is archived. Its tags, releases, Actions and Pages keep working.
+
 # agent-checkout-runner
 
 A combined runner for agent checkout and refund components: it drives each component's own code, keeps admission decisions, dispatch attempts, simulator effects and report-time observations in separate streams, and reports every claim as ESTABLISHED, CONTRADICTED or NOT_ESTABLISHED.
