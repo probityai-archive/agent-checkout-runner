@@ -1,5 +1,5 @@
 <!-- moved-to-monorepo -->
-> **Moved to [github.com/probityai/probity/examples/checkout-runner](https://github.com/probityai/probity/tree/main/examples/checkout-runner).** This repository is archived. Its tags, releases, Actions and Pages keep working.
+> **Moved to [probityai/probity/examples/checkout-runner](https://github.com/probityai/probity/tree/main/examples/checkout-runner). Star and follow it there.** This repository is archived; its tags and releases keep working.
 
 # agent-checkout-runner
 
